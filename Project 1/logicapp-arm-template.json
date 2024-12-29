@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+      {
+        "type": "Microsoft.Logic/workflows",
+        "apiVersion": "2019-05-01",
+        "name": "SentinelTriggerAlert",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "definition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "contentVersion": "1.0.0.0",
+            "actions": {
+              "Call_Function": {
+                "inputs": {
+                  "method": "POST",
+                  "uri": "https://sandboxFunction.azurewebsites.net/api/sandboxFunction",
+                  "body": {
+                    "ipAddress": "@{triggerBody()?['properties']?['ipAddress']}"
+                  }
+                },
+                "runAfter": {},
+                "type": "Http"
+              }
+            },
+            "triggers": {
+              "When_a_response_to_an_Azure_Sentinel_alert_is_triggered": {
+                "inputs": {
+                  "schema": {},
+                  "callbackUrl": "https://sandboxFunction.azurewebsites.net/api/sandboxFunction"
+                },
+                "type": "HttpWebhook"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+  

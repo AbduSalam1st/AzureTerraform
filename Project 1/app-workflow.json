@@ -1,0 +1,26 @@
+{
+  "definition": {
+    "triggers": {
+      "sentinelTriggerWorkstation": {
+        "type": "HttpWebhook",
+        "inputs": {
+          "schema": {},
+          "callbackUrl": "https://sandboxFunction.azurewebsites.net/api/sandboxFunction"
+        }
+      }
+    },
+    "actions": {
+      "Call_Function": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "https://sandboxFunction.azurewebsites.net/api/sandboxFunction",
+          "body": {
+            "ipAddress": "@{triggerBody()?['properties']?['ipAddress']}"
+          }
+        }
+      }
+    }
+  }
+}
+
