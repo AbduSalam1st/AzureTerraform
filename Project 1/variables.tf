@@ -27,3 +27,8 @@ variable "resoruce_location" {
   type    = string
   default = "UK South"
 }
+
+variable "githubactionsTPlan" {
+  description = "GITHUB ACTIONS CI VARIABLE TPlan"
+  type        = string
+}

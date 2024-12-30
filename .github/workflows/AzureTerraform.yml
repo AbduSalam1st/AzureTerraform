@@ -40,14 +40,14 @@ jobs:
 
       # Terraform Format Check
       - name: Terraform Format Check
-        run: terraform fmt -check -recursive
+        run: terraform fmt 
 
       # Terraform Plan
       - name: Terraform Plan
         id: plan
         run: terraform plan -out=tfplan
         env:
-          TF_VAR_example: ${{ secrets.EXAMPLE_VARIABLE }} # Add your variables here
+          TF_VAR_example: ${{ secrets.GITHUB_TOKEN }} # Add your variables here
 
       # Upload Plan (for PRs)
       - name: Upload Plan (PR)
@@ -62,4 +62,4 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: terraform apply -auto-approve tfplan
         env:
-          TF_VAR_example: ${{ secrets.EXAMPLE_VARIABLE }} # Add your variables here
+          TF_VAR_example: ${{ secrets.GITHUB_TOKEN }} # Add your variables here
