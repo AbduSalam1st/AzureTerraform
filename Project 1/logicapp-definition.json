@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "manual_trigger": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {}
+        }
+      }
+    },
+    "actions": {
+      "Do_Something": {
+        "type": "Compose",
+        "inputs": "Hello from Logic App!"
+      }
+    },
+    "outputs": {}
+  }
