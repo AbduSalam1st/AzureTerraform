@@ -45,21 +45,13 @@ jobs:
       # Terraform Plan
       - name: Terraform Plan
         id: plan
-        run: terraform plan -out=tfplan
+        run: terraform plan
         env:
           TF_VAR_example: ${{ secrets.GITHUB_TOKEN }} # Add your variables here
-
-      # Upload Plan (for PRs)
-      - name: Upload Plan (PR)
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: terraform-plan
-          path: tfplan
 
       # Terraform Apply (on push to main)
       - name: Terraform Apply
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve 
         env:
           TF_VAR_example: ${{ secrets.GITHUB_TOKEN }} # Add your variables here
