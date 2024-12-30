@@ -32,25 +32,30 @@ jobs:
 
       # Terraform Init
       - name: Terraform Init
+        working-directory: ./Project 1
         run: terraform init -backend-config=${{ env.TF_BACKEND_CONFIG_FILE }}
 
       # Terraform Validate
       - name: Terraform Validate
+        working-directory: ./Project 1
         run: terraform validate
 
       # Terraform Format Check
       - name: Terraform Format Check
+        working-directory: ./Project 1
         run: terraform fmt 
 
       # Terraform Plan
       - name: Terraform Plan
         id: plan
+        working-directory: ./Project 1
         run: terraform plan
         env:
           TF_VAR_example: ${{ secrets.GITHUB_TOKEN }} # Add your variables here
 
       # Terraform Apply (on push to main)
       - name: Terraform Apply
+        working-directory: ./Project 1
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: terraform apply -auto-approve 
         env:
