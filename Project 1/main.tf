@@ -199,9 +199,6 @@ resource "azurerm_role_assignment" "agic_network_contributor" {
 #   source = "./security"
 # }
 
-resource "azurerm_sentinel_workspace" "sandboxingworkspace" {
-  scope = azurerm_log_analytics_workspace.sentinel_workspace.id
-}
 
 resource "azurerm_log_analytics_workspace" "sentinel_workspace" {
   name                = "sentinel-log-analytics"
@@ -219,7 +216,7 @@ resource "azurerm_sentinel_log_analytics_workspace_onboarding" "onboardingSentin
 resource "azurerm_sentinel_alert_rule_scheduled" "scheduledRule" {
   name                       = "scheduledRule"
   log_analytics_workspace_id = azurerm_log_analytics_workspace.sentinel_workspace.id
-  display_name               = "ALERT_Sandbox"
+  display_name               = azurerm_log_analytics_workspace.sentinel_workspace.id
   severity                   = "High"
   query                      = <<QUERY
 AzureActivity |
@@ -332,4 +329,23 @@ TEMPLATE
 
 output "arm_example_output" {
   value = jsondecode(azurerm_resource_group_template_deployment.resourceGroupTemplate.output_content).exampleOutput.value
+}
+
+
+resource "azurerm_network_security_group" "sandbox_nsg" {
+  name                = "sandbox-nsg"
+  location            = var.resoruce_location
+  resource_group_name = var.resource_group_name
+
+  security_rule {
+    name                       = "Deny-All"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
