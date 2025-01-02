@@ -360,7 +360,7 @@ resource "azurerm_role_assignment" "agic_network_contributor" {
 
 # Logic App Workflow
 resource "azurerm_logic_app_workflow" "sandbox_logic_app" {
-  name                = "Trigger_Sandbox_Isolation"
+  name                = "sandboxTrigger"
   location            = var.resoruce_location
   resource_group_name = var.resource_group_name
 
@@ -369,55 +369,14 @@ resource "azurerm_logic_app_workflow" "sandbox_logic_app" {
   }
 }
 
-# API Connection: Azure Sentinel
-resource "azurerm_logic_app_api_connection" "sentinel_connection" {
-  name                = "azuresentinel-Trigger_Sandbox_Isolation"
-  location            = var.resoruce_location
-  resource_group_name = var.resource_group_name
-
-  properties {
-    api = {
-      id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Web/locations/${var.resoruce_location}/managedApis/azuresentinel"
-    }
-
-    authentication = {
-      type = "ManagedServiceIdentity"
-    }
-  }
-}
-
-# API Connection: ARM (for VM operations)
-resource "azurerm_logic_app_api_connection" "arm_connection" {
-  name                = "arm-1"
-  location            = var.resoruce_location
-  resource_group_name = var.resource_group_name
-
-  properties {
-    api = {
-      id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Web/locations/${var.resoruce_location}/managedApis/arm"
-    }
-
-    authentication = {
-      type = "ManagedServiceIdentity"
-    }
-  }
-}
-
-# Role Assignment for Managed Identity to Deallocate VMs
-resource "azurerm_role_assignment" "logic_app_vm_role" {
-  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}"
-  role_definition_name = "Virtual Machine Contributor"
+resource "azurerm_role_assignment" "logic_app_role" {
+  scope                = azurerm_resource_group.sandbox.id
+  role_definition_name = "Contributor"
   principal_id         = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
 }
 
-# Role Assignment for Sentinel API Connection
-resource "azurerm_role_assignment" "logic_app_sentinel_role" {
-  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}"
-  role_definition_name = "Microsoft Sentinel Responder"
+resource "azurerm_role_assignment" "vm_deallocation_role" {
+  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Compute/virtualMachines/${var.vm_name}"
+  role_definition_name = "Contributor"
   principal_id         = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
-}
-
-# Output Logic App Workflow Identity
-output "logic_app_identity" {
-  value = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
 }
