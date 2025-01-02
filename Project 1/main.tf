@@ -370,7 +370,7 @@ resource "azurerm_logic_app_workflow" "sandbox_logic_app" {
 }
 
 resource "azurerm_role_assignment" "logic_app_role" {
-  scope                = azurerm_resource_group.sandbox.id
+  scope                = azurerm_resource_group.region.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
 }
