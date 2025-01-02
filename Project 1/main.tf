@@ -37,14 +37,14 @@ resource "azurerm_virtual_network" "VPC" {
   resource_group_name = var.resource_group_name
 }
 
-resource "azurerm_subnet" "subnet" {
+resource "azurerm_subnet" "Subnet1" {
   name                 = "Subnet1"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.VPC.name
   address_prefixes     = ["10.0.1.0/24"]
 }
 
-resource "azurerm_subnet" "subnet" {
+resource "azurerm_subnet" "sandboxEnviroment" {
   name                 = "sandboxEnviroment"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.VPC.name
@@ -420,10 +420,4 @@ resource "azurerm_role_assignment" "logic_app_sentinel_role" {
 # Output Logic App Workflow Identity
 output "logic_app_identity" {
   value = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
-}
-
-# Variables for Subscription
-variable "subscription_id" {
-  description = "Azure Subscription ID"
-  type        = string
 }
