@@ -44,6 +44,14 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
+resource "azurerm_subnet" "subnet" {
+  name                 = "sandboxEnviroment"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.VPC.name
+  address_prefixes     = ["10.0.100.0/24"]
+}
+
+
 
 resource "azurerm_virtual_network" "AGW" {
   name                = "AGW_Network"
