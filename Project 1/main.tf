@@ -208,152 +208,222 @@ resource "azurerm_role_assignment" "agic_network_contributor" {
 # }
 
 
-resource "azurerm_log_analytics_workspace" "sentinel_workspace" {
-  name                = "sentinel-log-analytics"
-  resource_group_name = var.resource_group_name
+# resource "azurerm_log_analytics_workspace" "sentinel_workspace" {
+#   name                = "sentinel-log-analytics"
+#   resource_group_name = var.resource_group_name
+#   location            = var.resoruce_location
+#   sku                 = "PerGB2018"
+#   retention_in_days   = 30
+# }
+
+# resource "azurerm_sentinel_log_analytics_workspace_onboarding" "onboardingSentinel" {
+#   workspace_id = azurerm_log_analytics_workspace.sentinel_workspace.id
+# }
+
+
+# resource "azurerm_sentinel_alert_rule_scheduled" "scheduledRule" {
+#   name                       = "scheduledRule"
+#   log_analytics_workspace_id = azurerm_log_analytics_workspace.sentinel_workspace.id
+#   display_name               = azurerm_log_analytics_workspace.sentinel_workspace.id
+#   severity                   = "High"
+#   query                      = <<QUERY
+# AzureActivity |
+#   where OperationName == "Create or Update Virtual Machine" or OperationName =="Create Deployment" |
+#   where ActivityStatus == "Succeeded" |
+#   make-series dcount(ResourceId) default=0 on EventSubmissionTimestamp in range(ago(7d), now(), 1d) by Caller
+# QUERY
+# }
+
+# resource "azurerm_storage_account" "abdulstorage1" {
+#   name                     = "abdulstorage1"
+#   resource_group_name      = var.resource_group_name
+#   location                 = var.resoruce_location
+#   account_tier             = "Standard"
+#   account_replication_type = "GRS"
+# }
+
+# resource "azurerm_service_plan" "servicePlan" {
+#   name                = "example-app-service-plan"
+#   resource_group_name = var.resource_group_name
+#   location            = var.resoruce_location
+#   os_type             = "Linux"
+#   sku_name            = "B1"
+# }
+
+# resource "azurerm_linux_function_app" "sandbox_function" {
+#   name                       = "abdulsandboxing"
+#   resource_group_name        = var.resource_group_name
+#   location                   = var.resoruce_location
+#   service_plan_id            = azurerm_service_plan.servicePlan.id
+#   storage_account_name       = azurerm_storage_account.abdulstorage1.name
+#   storage_account_access_key = azurerm_storage_account.abdulstorage1.primary_access_key
+
+#   site_config {
+#   }
+
+#    app_settings = {
+#     FUNCTIONS_WORKER_RUNTIME = "python"
+#     AzureWebJobsStorage      = azurerm_storage_account.abdulstorage1.primary_connection_string
+#   }
+
+#   identity {
+#     type = "SystemAssigned"
+#   }
+# }
+
+
+# resource "azurerm_logic_app_workflow" "FunctionTrigger" {
+#   name                = "SentinelTriggerAlert"
+#   location            = var.resoruce_location
+#   resource_group_name = var.resource_group_name
+#   enabled = true
+
+#   workflow_schema  = "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#"
+#   workflow_version = "1.0.0.0"
+
+  
+# }
+
+
+# resource "azurerm_resource_group_template_deployment" "resourceGroupTemplate" {
+#   name                = "deploy"
+#   resource_group_name = var.resource_group_name
+#   deployment_mode     = "Incremental"
+#   parameters_content = jsonencode({
+#     "vnetName" = {
+#       value = "VPC1"
+#     }
+#   })
+#   template_content = <<TEMPLATE
+# {
+#     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+#     "contentVersion": "1.0.0.0",
+#     "parameters": {
+#         "vnetName": {
+#             "type": "string",
+#             "metadata": {
+#                 "description": "Name of the VNET"
+#             }
+#         }
+#     },
+#     "variables": {},
+#     "resources": [
+#         {
+#             "type": "Microsoft.Network/virtualNetworks",
+#             "apiVersion": "2020-05-01",
+#             "name": "[parameters('vnetName')]",
+#             "location": "[resourceGroup().location]",
+#             "properties": {
+#                 "addressSpace": {
+#                     "addressPrefixes": [
+#                         "10.0.0.0/16"
+#                     ]
+#                 }
+#             }
+#         }
+#     ],
+#     "outputs": {
+#       "exampleOutput": {
+#         "type": "string",
+#         "value": "someoutput"
+#       }
+#     }
+# }
+# TEMPLATE
+
+#   // NOTE: whilst we show an inline template here, we recommend
+#   // sourcing this from a file for readability/editor support
+# }
+
+# output "arm_example_output" {
+#   value = jsondecode(azurerm_resource_group_template_deployment.resourceGroupTemplate.output_content).exampleOutput.value
+# }
+
+
+# resource "azurerm_network_security_group" "sandbox_nsg" {
+#   name                = "sandbox-nsg"
+#   location            = var.resoruce_location
+#   resource_group_name = var.resource_group_name
+
+#   security_rule {
+#     name                       = "Deny-All"
+#     priority                   = 100
+#     direction                  = "Inbound"
+#     access                     = "Deny"
+#     protocol                   = "*"
+#     source_port_range          = "*"
+#     destination_port_range     = "*"
+#     source_address_prefix      = "*"
+#     destination_address_prefix = "*"
+#   }
+# }
+
+# Logic App Workflow
+resource "azurerm_logic_app_workflow" "sandbox_logic_app" {
+  name                = "Trigger_Sandbox_Isolation"
   location            = var.resoruce_location
-  sku                 = "PerGB2018"
-  retention_in_days   = 30
-}
-
-resource "azurerm_sentinel_log_analytics_workspace_onboarding" "onboardingSentinel" {
-  workspace_id = azurerm_log_analytics_workspace.sentinel_workspace.id
-}
-
-
-resource "azurerm_sentinel_alert_rule_scheduled" "scheduledRule" {
-  name                       = "scheduledRule"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.sentinel_workspace.id
-  display_name               = azurerm_log_analytics_workspace.sentinel_workspace.id
-  severity                   = "High"
-  query                      = <<QUERY
-AzureActivity |
-  where OperationName == "Create or Update Virtual Machine" or OperationName =="Create Deployment" |
-  where ActivityStatus == "Succeeded" |
-  make-series dcount(ResourceId) default=0 on EventSubmissionTimestamp in range(ago(7d), now(), 1d) by Caller
-QUERY
-}
-
-resource "azurerm_storage_account" "abdulstorage1" {
-  name                     = "abdulstorage1"
-  resource_group_name      = var.resource_group_name
-  location                 = var.resoruce_location
-  account_tier             = "Standard"
-  account_replication_type = "GRS"
-}
-
-resource "azurerm_service_plan" "servicePlan" {
-  name                = "example-app-service-plan"
   resource_group_name = var.resource_group_name
-  location            = var.resoruce_location
-  os_type             = "Linux"
-  sku_name            = "B1"
-}
-
-resource "azurerm_linux_function_app" "sandbox_function" {
-  name                       = "abdulsandboxing"
-  resource_group_name        = var.resource_group_name
-  location                   = var.resoruce_location
-  service_plan_id            = azurerm_service_plan.servicePlan.id
-  storage_account_name       = azurerm_storage_account.abdulstorage1.name
-  storage_account_access_key = azurerm_storage_account.abdulstorage1.primary_access_key
-
-  site_config {
-  }
-
-   app_settings = {
-    FUNCTIONS_WORKER_RUNTIME = "python"
-    AzureWebJobsStorage      = azurerm_storage_account.abdulstorage1.primary_connection_string
-  }
 
   identity {
     type = "SystemAssigned"
   }
 }
 
-
-resource "azurerm_logic_app_workflow" "FunctionTrigger" {
-  name                = "SentinelTriggerAlert"
-  location            = var.resoruce_location
-  resource_group_name = var.resource_group_name
-  enabled = true
-
-  workflow_schema  = "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#"
-  workflow_version = "1.0.0.0"
-
-  
-}
-
-
-resource "azurerm_resource_group_template_deployment" "resourceGroupTemplate" {
-  name                = "deploy"
-  resource_group_name = var.resource_group_name
-  deployment_mode     = "Incremental"
-  parameters_content = jsonencode({
-    "vnetName" = {
-      value = "VPC1"
-    }
-  })
-  template_content = <<TEMPLATE
-{
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "vnetName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of the VNET"
-            }
-        }
-    },
-    "variables": {},
-    "resources": [
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2020-05-01",
-            "name": "[parameters('vnetName')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "10.0.0.0/16"
-                    ]
-                }
-            }
-        }
-    ],
-    "outputs": {
-      "exampleOutput": {
-        "type": "string",
-        "value": "someoutput"
-      }
-    }
-}
-TEMPLATE
-
-  // NOTE: whilst we show an inline template here, we recommend
-  // sourcing this from a file for readability/editor support
-}
-
-output "arm_example_output" {
-  value = jsondecode(azurerm_resource_group_template_deployment.resourceGroupTemplate.output_content).exampleOutput.value
-}
-
-
-resource "azurerm_network_security_group" "sandbox_nsg" {
-  name                = "sandbox-nsg"
+# API Connection: Azure Sentinel
+resource "azurerm_logic_app_api_connection" "sentinel_connection" {
+  name                = "azuresentinel-Trigger_Sandbox_Isolation"
   location            = var.resoruce_location
   resource_group_name = var.resource_group_name
 
-  security_rule {
-    name                       = "Deny-All"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
+  properties {
+    api = {
+      id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Web/locations/${var.resoruce_location}/managedApis/azuresentinel"
+    }
+
+    authentication = {
+      type = "ManagedServiceIdentity"
+    }
   }
+}
+
+# API Connection: ARM (for VM operations)
+resource "azurerm_logic_app_api_connection" "arm_connection" {
+  name                = "arm-1"
+  location            = var.resoruce_location
+  resource_group_name = var.resource_group_name
+
+  properties {
+    api = {
+      id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Web/locations/${var.resoruce_location}/managedApis/arm"
+    }
+
+    authentication = {
+      type = "ManagedServiceIdentity"
+    }
+  }
+}
+
+# Role Assignment for Managed Identity to Deallocate VMs
+resource "azurerm_role_assignment" "logic_app_vm_role" {
+  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}"
+  role_definition_name = "Virtual Machine Contributor"
+  principal_id         = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
+}
+
+# Role Assignment for Sentinel API Connection
+resource "azurerm_role_assignment" "logic_app_sentinel_role" {
+  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}"
+  role_definition_name = "Microsoft Sentinel Responder"
+  principal_id         = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
+}
+
+# Output Logic App Workflow Identity
+output "logic_app_identity" {
+  value = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
+}
+
+# Variables for Subscription
+variable "subscription_id" {
+  description = "Azure Subscription ID"
+  type        = string
 }
