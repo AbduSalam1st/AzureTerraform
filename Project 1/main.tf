@@ -256,11 +256,14 @@ QUERY
     }
   }
 }
+resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinelAnalytics" {
+  workspace_id = azurerm_log_analytics_workspace.sentinelAnalytics.id
+}
 
 # Automation Rule to Trigger Logic App
 resource "azurerm_sentinel_automation_rule" "trigger_logic_app" {
  name                       = "TriggerLogicApp"
-  log_analytics_workspace_id = azurerm_sentinel_log_analytics_workspace_onboarding.example.workspace_id
+  log_analytics_workspace_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinelAnalytics.workspace_id
   display_name               = "automation_rule1"
   order                      = 1
   action_incident {
