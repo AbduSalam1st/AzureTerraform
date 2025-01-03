@@ -49,14 +49,10 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: ./Project 1
-        run: terraform plan
-        env:
-          TF_VAR_example: ${{ secrets.GITHUB_TOKEN }} # Add your variables here
+        run: terraform plan -var-file="terraform.tfvars"
 
       # Terraform Apply (on push to main)
       - name: Terraform Apply
         working-directory: ./Project 1
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        run: terraform apply -auto-approve 
-        env:
-          TF_VAR_example: ${{ secrets.GITHUB_TOKEN }} # Add your variables here
+        run: terraform apply -auto-approve -var-file="terraform.tfvars"
