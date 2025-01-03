@@ -49,10 +49,10 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: ./Project 1
-        run: terraform plan -var-file="./Project 1/terraform.tfvars"
+        run: terraform plan 
 
       # Terraform Apply (on push to main)
       - name: Terraform Apply
         working-directory: ./Project 1
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        run: terraform apply -auto-approve -var-file="terraform.tfvars"
+        run: terraform apply -auto-approve 
