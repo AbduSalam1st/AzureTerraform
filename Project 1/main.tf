@@ -217,19 +217,13 @@ resource "azurerm_resource_group" "sandbox" {
 # Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "sentinel_workspace" {
   name                = "sentinel-log-analytics"
-  location            = azurerm_resource_group.sandbox.location
-  resource_group_name = azurerm_resource_group.sandbox.name
+  location            = var.resoruce_location
+  resource_group_name = var.resource_group_name
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
 
 # Microsoft Sentinel Instance
-resource "azurerm_sentinel" "sentinel_instance" {
-  name                = "SentinelInstance"
-  location            = var.resoruce_location
-  resource_group_name = var.resource_group_name
-  workspace_id        = azurerm_log_analytics_workspace.sentinel_workspace.id
-}
 
 # Analytics Rule for VM Creation or Modification
 resource "azurerm_sentinel_alert_rule_scheduled" "vm_creation_alert" {
@@ -245,8 +239,8 @@ AzureActivity
 | where ActivityStatus == "Succeeded"
 QUERY
 
-  query_frequency = 5
-  query_period    = 60
+  query_frequency = "PT5M"
+  query_period    = "PT60M"
   trigger_operator           = "GreaterThan"
   trigger_threshold          = 0
   incident {
