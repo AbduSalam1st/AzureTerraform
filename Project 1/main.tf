@@ -191,8 +191,8 @@ resource "azurerm_application_gateway" "appgw" {
 
 resource "azurerm_user_assigned_identity" "agic_identity" {
   name                = "agic-identity"
-  resource_group_name = azurerm_resource_group.region.name
-  location            = azurerm_resource_group.region.location
+  resource_group_name = var.resource_group_name
+  location            = var.resoruce_location
 }
 
 resource "azurerm_role_assignment" "agic_network_contributor" {
@@ -204,45 +204,14 @@ resource "azurerm_role_assignment" "agic_network_contributor" {
 
 # module "security" {
 # Terraform Configuration for Azure Sentinel Automation Sandboxing Infrastructure
-
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
-    }
-  }
-  required_version = ">= 1.3.0"
-}
-
-provider "azurerm" {
-  features {}
-}
-
-variable "location" {
-  default = "uksouth"
-}
-
-variable "resource_group_name" {
-  default = "sentinel-sandbox-rg"
-}
-
-variable "logic_app_name" {
-  default = "Trigger_Sandbox_Isolation"
-}
-
 variable "vm_name" {
   default = "testingSentinelVM"
 }
 
-variable "subscription_id" {
-  description = "Azure Subscription ID"
-  type        = string
-}
 
 resource "azurerm_resource_group" "sandbox" {
   name     = var.resource_group_name
-  location = var.location
+  location = var.resoruce_location
 }
 
 # Log Analytics Workspace
@@ -257,8 +226,8 @@ resource "azurerm_log_analytics_workspace" "sentinel_workspace" {
 # Microsoft Sentinel Instance
 resource "azurerm_sentinel" "sentinel_instance" {
   name                = "SentinelInstance"
-  location            = azurerm_resource_group.sandbox.location
-  resource_group_name = azurerm_resource_group.sandbox.name
+  location            = var.resoruce_location
+  resource_group_name = var.resource_group_name
   workspace_id        = azurerm_log_analytics_workspace.sentinel_workspace.id
 }
 
@@ -301,9 +270,9 @@ resource "azurerm_sentinel_automation_rule" "trigger_logic_app" {
 }
 
 resource "azurerm_logic_app_workflow" "sandbox_logic_app" {
-  name                = var.logic_app_name
-  location            = azurerm_resource_group.sandbox.location
-  resource_group_name = azurerm_resource_group.sandbox.name
+  name                = "Trigger_Sandbox_Isolation"
+  location            = var.resoruce_location
+  resource_group_name = var.resource_group_name
 
   identity {
     type = "SystemAssigned"
@@ -311,13 +280,13 @@ resource "azurerm_logic_app_workflow" "sandbox_logic_app" {
 }
 
 resource "azurerm_role_assignment" "logic_app_role" {
-  scope                = azurerm_resource_group.sandbox.id
+  scope                = azurerm_resource_group.region.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
 }
 
 resource "azurerm_role_assignment" "vm_deallocation_role" {
-  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.sandbox.name}/providers/Microsoft.Compute/virtualMachines/${var.vm_name}"
+  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.region.name}/providers/Microsoft.Compute/virtualMachines/${var.vm_name}"
   role_definition_name = "Contributor"
   principal_id         = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
 }
