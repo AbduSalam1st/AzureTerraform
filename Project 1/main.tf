@@ -26,10 +26,6 @@ resource "azurerm_resource_group" "region" {
   location = var.resoruce_location
 }
 
-
-
-# This is the networking module regarding the Virtual Networks, Subnets etc.check "name" 
-
 resource "azurerm_virtual_network" "VPC" {
   name                = "VPC1"
   address_space       = ["10.0.0.0/16"]
@@ -51,12 +47,6 @@ resource "azurerm_subnet" "sandboxEnviroment" {
   address_prefixes     = ["10.0.100.0/24"]
 }
 
-
-variable "vm_name" {
-  description = "Name of the virtual machine to manage based on Sentinel alert"
-  type        = string
-}
-
 resource "azurerm_network_interface" "VM_network_interface" {
   name                = "NIC"
   location            = var.resoruce_location
@@ -75,7 +65,6 @@ resource "azurerm_virtual_machine" "Workstation1" {
   resource_group_name   = var.resource_group_name
   network_interface_ids = [azurerm_network_interface.VM_network_interface.id]
   vm_size               = "Standard_DS1_v2"
-
 
   storage_image_reference {
     publisher = "Canonical"
@@ -148,8 +137,6 @@ resource "azurerm_subnet" "AGWSub" {
   virtual_network_name = azurerm_virtual_network.AGW.name
   address_prefixes     = ["192.168.40.0/24"]
 }
-
-
 
 resource "azurerm_public_ip" "appgw_public_ip" {
   name                = "appgw-public-ip"
@@ -241,12 +228,7 @@ resource "azurerm_role_assignment" "agic_network_contributor" {
   scope                = azurerm_resource_group.region.id
 }
 
-
-# module "security" {
 # Terraform Configuration for Azure Sentinel Automation Sandboxing Infrastructure
-
-
-
 resource "azurerm_resource_group" "sandbox" {
   name     = var.resource_group_name
   location = var.resoruce_location
@@ -262,7 +244,6 @@ resource "azurerm_log_analytics_workspace" "sentinel_workspace" {
 }
 
 # Microsoft Sentinel Instance
-
 # Analytics Rule for VM Creation or Modification
 resource "azurerm_sentinel_alert_rule_scheduled" "vm_creation_alert" {
   name                       = "Alert_VM_Creation"
