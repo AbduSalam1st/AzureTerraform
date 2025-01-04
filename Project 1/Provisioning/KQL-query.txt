@@ -1,0 +1,5 @@
+SecurityAlert
+| where AlertName contains "Virtual Machine"
+| extend VMName = tostring(parse_json(Entities)[0].Name)
+| project VMName
+| take 1
