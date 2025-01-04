@@ -52,28 +52,13 @@ resource "azurerm_subnet" "sandboxEnviroment" {
 }
 
 
-
-resource "azurerm_virtual_network" "AGW" {
-  name                = "AGW_Network"
-  resource_group_name = azurerm_resource_group.region.name
-  location            = azurerm_resource_group.region.location
-  address_space       = ["192.168.0.0/16"]
-}
-
-resource "azurerm_subnet" "AGWSub" {
-  name                 = "AGW_Subnet"
-  resource_group_name  = azurerm_resource_group.region.name
-  virtual_network_name = azurerm_virtual_network.AGW.name
-  address_prefixes     = ["192.168.1.0/24"]
-}
-
 variable "vm_name" {
   description = "Name of the virtual machine to manage based on Sentinel alert"
   type        = string
 }
 
 resource "azurerm_network_interface" "VM_network_interface" {
-  name                =  "NIC"
+  name                = "NIC"
   location            = var.resoruce_location
   resource_group_name = var.resource_group_name
 
@@ -85,17 +70,12 @@ resource "azurerm_network_interface" "VM_network_interface" {
 }
 
 resource "azurerm_virtual_machine" "Workstation1" {
-  name                  = azurerm_virtual_machine.Workstation1.id
+  name                  = "Workstation1"
   location              = var.resoruce_location
   resource_group_name   = var.resource_group_name
   network_interface_ids = [azurerm_network_interface.VM_network_interface.id]
   vm_size               = "Standard_DS1_v2"
 
-  # Uncomment this line to delete the OS disk automatically when deleting the VM
-  # delete_os_disk_on_termination = true
-
-  # Uncomment this line to delete the data disks automatically when deleting the VM
-  # delete_data_disks_on_termination = true
 
   storage_image_reference {
     publisher = "Canonical"
@@ -121,9 +101,6 @@ resource "azurerm_virtual_machine" "Workstation1" {
     environment = "testing"
   }
 }
-
-
-
 
 resource "azurerm_kubernetes_cluster" "cluster" {
   name                = "learnk8scluster"
@@ -158,11 +135,26 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   # http_application_routing_enabled = true /////CHECK THIS BIT OF CODE OUT AS AZURE HAS DEPRECATED USING ADDONS.
 }
 
+resource "azurerm_virtual_network" "AGW" {
+  name                = "AGW_Network"
+  resource_group_name = var.resource_group_name
+  location            = var.resoruce_location
+  address_space       = ["192.168.0.0/16"]
+}
+
+resource "azurerm_subnet" "AGWSub" {
+  name                 = "AGW_Subnet"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.AGW.name
+  address_prefixes     = ["192.168.40.0/24"]
+}
+
+
 
 resource "azurerm_public_ip" "appgw_public_ip" {
   name                = "appgw-public-ip"
-  resource_group_name = azurerm_resource_group.region.name
-  location            = azurerm_resource_group.region.location
+  resource_group_name = var.resource_group_name
+  location            = var.resoruce_location
   allocation_method   = "Static"
   sku                 = "Standard"
 }
@@ -329,7 +321,7 @@ resource "azurerm_role_assignment" "logic_app_role" {
 }
 
 resource "azurerm_role_assignment" "vm_deallocation_role" {
-  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.region.name}/providers/Microsoft.Compute/virtualMachines/${var.vm_name}"
+  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Compute/virtualMachines//${azurerm_virtual_machine.Workstation1.name}"
   role_definition_name = "Contributor"
   principal_id         = azurerm_logic_app_workflow.sandbox_logic_app.identity[0].principal_id
 }
