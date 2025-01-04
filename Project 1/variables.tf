@@ -28,7 +28,22 @@ variable "resoruce_location" {
   default = "UK South"
 }
 
-variable "githubactionsTPlan" {
-  description = "GITHUB ACTIONS CI VARIABLE TPlan"
-  type        = string
+variable "logic_app_name" {
+  default = "Trigger_Sandbox_Isolation"
 }
+
+variable "computer_name" {
+  type = string
+  sensitive = true
+}
+
+variable "admin_username" {
+  type = string
+  sensitive = true
+}
+
+variable "admin_password" {
+   type = string
+   sensitive = true
+}
+
