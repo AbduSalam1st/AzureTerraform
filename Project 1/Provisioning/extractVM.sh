@@ -1,5 +1,6 @@
 #!/bin/bash
 
+TFVARS_FILE="./terraform.tfvars"
 # Define variables for subscription, resource group, and workspace
 SUBSCRIPTION_ID="<subscription-id>"
 RESOURCE_GROUP="resource-group-1"
