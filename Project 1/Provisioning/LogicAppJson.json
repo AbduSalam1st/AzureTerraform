@@ -1,0 +1,73 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "Microsoft_Sentinel_alert": {
+                "type": "ApiConnectionWebhook",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                        }
+                    },
+                    "body": {
+                        "callback_url": "@{listCallbackUrl()}"
+                    },
+                    "path": "/subscribe"
+                }
+            }
+        },
+        "actions": {
+            "Invoke_resource_operation": {
+                "runAfter": {},
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['arm-1']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/subscriptions/@{encodeURIComponent('<subscription_id>')}/resourcegroups/@{encodeURIComponent('<resource_group_name>')}/providers/@{encodeURIComponent('Microsoft.Compute')}/@{encodeURIComponent(triggerBody()?['properties']['resourceId'])}/@{encodeURIComponent('deallocate')}",
+                    "queries": {
+                        "x-ms-api-version": "2022-08-01"
+                    }
+                }
+            }
+        },
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "azuresentinel": {
+                    "id": "/subscriptions/<subscription_id>/providers/Microsoft.Web/locations/<location>/managedApis/azuresentinel",
+                    "connectionId": "/subscriptions/<subscription_id>/resourceGroups/<resource_group_name>/providers/Microsoft.Web/connections/<connection_name>",
+                    "connectionName": "<connection_name>",
+                    "connectionProperties": {
+                        "authentication": {
+                            "type": "ManagedServiceIdentity"
+                        }
+                    }
+                },
+                "arm-1": {
+                    "id": "/subscriptions/<subscription_id>/providers/Microsoft.Web/locations/<location>/managedApis/arm",
+                    "connectionId": "/subscriptions/<subscription_id>/resourceGroups/<resource_group_name>/providers/Microsoft.Web/connections/<connection_name>",
+                    "connectionName": "<connection_name>",
+                    "connectionProperties": {
+                        "authentication": {
+                            "type": "ManagedServiceIdentity"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
