@@ -30,7 +30,7 @@ jobs:
 
       # Step 3: Dynamically Create terraform.tfvars from Environment Secrets
       - name: Create terraform.tfvars
-        working-directory: ./Project\ 1
+        working-directory: Project 1
         run: |
           echo "client_id       = \"${{ secrets.ARM_CLIENT_ID }}\"" > terraform.tfvars
           echo "client_secret   = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> terraform.tfvars
