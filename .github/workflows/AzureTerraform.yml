@@ -1,204 +1,47 @@
-name: "Advanced Terraform Pipeline (Aligned to AzureTerraform Repo)"
+name: Terraform CI Pipeline
 
 on:
-  pull_request:
-    branches: [ "main", "develop" ]
   push:
-    branches: [ "main", "develop", "release/*" ]
-  workflow_dispatch:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  ##############################################
-  # 1) Lint & Security Scan (Runs on PR & Push)
-  ##############################################
-  lint_and_security_scan:
-    name: "Lint & Security Scan"
+  terraform:
+    name: Terraform CI
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Checkout Repository"
+      # Step 1: Checkout the repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: "Set up Terraform"
+      # Step 2: Set up Terraform CLI
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.4.6
+          terraform_version: 1.5.6 # Specify the desired Terraform version
 
-      # Install TFLint
-      - name: "Install TFLint"
-        run: |
-          curl -L https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+      # Step 3: Terraform Init
+      - name: Initialize Terraform
+        run: terraform init
 
-      # Run TFLint
-      - name: "Run TFLint"
-        run: |
-          cd Project1
-          tflint --init
-          tflint
-          cd ..
+      # Step 4: Terraform Validate
+      - name: Validate Terraform configuration
+        run: terraform validate
 
-      # Install tfsec
-      - name: "Install tfsec"
-        run: |
-          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install.sh | bash
+      # Step 5: Terraform Plan
+      - name: Generate Terraform Plan
+        run: terraform plan -out=tfplan
 
-      # Run tfsec
-      - name: "Run tfsec"
-        run: |
-          tfsec .
-
-      # Install Checkov
-      - name: "Install Checkov"
-        run: pip install checkov
-
-      # Run Checkov
-      - name: "Run Checkov"
-        run: checkov -d Project1
-
-  ##############################################
-  # 2) Terraform Plan (Runs on PR & Push)
-  ##############################################
-  terraform_plan:
-    name: "Terraform Plan"
-    runs-on: ubuntu-latest
-
-    needs: [lint_and_security_scan]
-
-    steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v3
-
-      - name: "Set up Terraform"
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.4.6
-
-      - name: "Terraform Init"
-        run: |
-          cd Project1
-          terraform init
-          cd ..
-
-      - name: "Terraform Validate"
-        run: |
-          cd Project1
-          terraform validate
-          cd ..
-
-      # Create a human-readable plan output and a binary plan file
-      - name: "Terraform Plan"
-        id: plan
-        run: |
-          cd Project1
-          terraform plan -no-color > plan_output.txt
-          terraform plan -out=tfplan
-          cd ..
-
-      # Upload the tfplan artifact for apply jobs
-      - name: "Upload tfplan"
+      # Step 6: Save Terraform Plan (Optional)
+      - name: Upload Terraform Plan
         uses: actions/upload-artifact@v3
         with:
-          name: tfplan
-          path: Project1/tfplan
+          name: terraform-plan
+          path: tfplan
 
-      # Post the plan output as a comment on the PR
-      - name: "Comment Plan on PR"
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const planPath = path.join(process.cwd(), 'Project1', 'plan_output.txt');
-            let planOutput = 'No plan output available.';
-            if (fs.existsSync(planPath)) {
-              planOutput = fs.readFileSync(planPath, 'utf8');
-            }
-            github.rest.issues.createComment({
-              issue_number: context.payload.pull_request.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## Terraform Plan\n\`\`\`\n${planOutput}\n\`\`\``
-            });
-
-  ##################################################################
-  # 3) Terraform Apply for Non-Production (Auto) - e.g., Dev/Staging
-  ##################################################################
-  terraform_apply_dev_staging:
-    name: "Terraform Apply (Dev/Staging)"
-    runs-on: ubuntu-latest
-
-    # Auto-deploy on pushes to 'develop' or 'release/*' branches
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/')
-    needs: [terraform_plan]
-
-    steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v3
-
-      - name: "Set up Terraform"
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.4.6
-
-      # Download the tfplan artifact from the plan job
-      - name: "Download tfplan"
-        uses: actions/download-artifact@v3
-        with:
-          name: tfplan
-          path: Project1/
-
-      - name: "Terraform Init"
-        run: |
-          cd Project1
-          terraform init
-          cd ..
-
-      - name: "Terraform Apply"
-        run: |
-          cd Project1
-          terraform apply -auto-approve tfplan
-          cd ..
-
-  ##################################################################
-  # 4) Terraform Apply for Production (Manual Approval)
-  ##################################################################
-  terraform_apply_production:
-    name: "Terraform Apply (Production)"
-    runs-on: ubuntu-latest
-
-    # Only run on push to main or release/* branches
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
-    needs: [terraform_plan]
-
-    # GitHub Environment for manual approval step
-    environment: production
-
-    steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v3
-
-      - name: "Set up Terraform"
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.4.6
-
-      # Download the tfplan artifact from the plan job
-      - name: "Download tfplan"
-        uses: actions/download-artifact@v3
-        with:
-          name: tfplan
-          path: Project1/
-
-      - name: "Terraform Init"
-        run: |
-          cd Project1
-          terraform init
-          cd ..
-
-      - name: "Terraform Apply (Requires Approval)"
-        run: |
-          cd Project1
-          terraform apply -auto-approve tfplan
-          cd ..
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
