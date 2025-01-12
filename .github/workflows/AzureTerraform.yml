@@ -44,7 +44,7 @@ jobs:
 
       # Step 4: Terraform Init (Uses environment variables for Azure auth)
       - name: Terraform Init
-        working-directory: ./Project\ 1
+        working-directory: Project 1
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -54,12 +54,12 @@ jobs:
 
       # Step 5: Terraform Validate
       - name: Validate Terraform configuration
-        working-directory: ./Project\ 1
+        working-directory: Project 1
         run: terraform validate
 
       # Step 6: Terraform Plan
       - name: Generate Terraform Plan
-        working-directory: ./Project\ 1
+        working-directory: Project 1
         run: terraform plan -var-file=terraform.tfvars -out=tfplan
 
       # Step 7: (Optional) Upload Terraform Plan
@@ -67,13 +67,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: terraform-plan
-          path: ./Project\ 1/tfplan
+          path: Project 1/tfplan
 
       # Step 8: (Optional) Terraform Apply on Manual Dispatch
       - name: Apply Terraform Plan
         # 'workflow_dispatch' is triggered manually through the GitHub Actions UI
         if: github.event_name == 'workflow_dispatch'
-        working-directory: ./Project\ 1
+        working-directory: Project 1
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
