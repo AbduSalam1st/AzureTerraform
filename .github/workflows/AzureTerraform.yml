@@ -1,4 +1,4 @@
-name: Terraform CI Pipeline
+name: Secure Terraform CI Pipeline
 
 on:
   push:
@@ -7,11 +7,15 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   terraform:
-    name: Terraform CI
+    name: Terraform Deployment
     runs-on: ubuntu-latest
+    
+    # 1) Reference your environment here. Replace 'AzureP1' with your actual environment name if different.
+    environment: AzureP1
 
     steps:
       # Step 1: Checkout the repository
@@ -22,41 +26,57 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.6 # Specify your Terraform version
+          terraform_version: 1.5.6  # Use your preferred version
 
-      # Step 3: Change to the Project1 directory
-      - name: Change to Project1 directory
-        working-directory: ./Project 1
-        run: pwd
+      # Step 3: Dynamically Create terraform.tfvars from Environment Secrets
+      - name: Create terraform.tfvars
+        working-directory: ./Project\ 1
+        run: |
+          echo "client_id       = \"${{ secrets.ARM_CLIENT_ID }}\"" > terraform.tfvars
+          echo "client_secret   = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> terraform.tfvars
+          echo "tenant_id       = \"${{ secrets.ARM_TENANT_ID }}\"" >> terraform.tfvars
+          echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> terraform.tfvars
+          echo "computer_name   = \"hostname\"" >> terraform.tfvars
+          echo "admin_username  = \"${{ secrets.ADMIN_USERNAME }}\"" >> terraform.tfvars
+          echo "admin_password  = \"${{ secrets.ADMIN_PASSWORD }}\"" >> terraform.tfvars
+          echo "resource_group_name = \"${{ secrets.RESOURCE_GROUP_NAME }}\"" >> terraform.tfvars
+          echo "resource_location   = \"${{ secrets.RESOURCE_LOCATION }}\"" >> terraform.tfvars
 
-      # Step 4: Terraform Init & format
-      - name: Initialize Terraform
-        working-directory: ./Project 1
+      # Step 4: Terraform Init (Uses environment variables for Azure auth)
+      - name: Terraform Init
+        working-directory: ./Project\ 1
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         run: terraform init
-
-      - name: Initialize Terraform
-        working-directory: ./Project 1
-        run: terraform fmt -recursive
 
       # Step 5: Terraform Validate
       - name: Validate Terraform configuration
-        working-directory: ./Project 1
+        working-directory: ./Project\ 1
         run: terraform validate
 
-      # Step 6: Terraform Plan with tfvars file
+      # Step 6: Terraform Plan
       - name: Generate Terraform Plan
-        working-directory: ./Project 1
-        run: terraform plan -var-file="terraform.tfvars" -out=tfplan
+        working-directory: ./Project\ 1
+        run: terraform plan -var-file=terraform.tfvars -out=tfplan
 
-      # Step 7: Save Terraform Plan (Optional)
+      # Step 7: (Optional) Upload Terraform Plan
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v3
         with:
           name: terraform-plan
-          path: ./Project 1/tfplan
+          path: ./Project\ 1/tfplan
 
-      # Step 8: Terraform Apply (Optional for Manual Approval)
+      # Step 8: (Optional) Terraform Apply on Manual Dispatch
       - name: Apply Terraform Plan
-        if: github.event_name == 'workflow_dispatch' # Only runs on manual trigger
-        working-directory: ./Project 1
+        # 'workflow_dispatch' is triggered manually through the GitHub Actions UI
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: ./Project\ 1
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         run: terraform apply -var-file="terraform.tfvars" -auto-approve
