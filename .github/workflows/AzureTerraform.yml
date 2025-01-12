@@ -34,7 +34,7 @@ jobs:
 
       # Step 5: Terraform Plan
       - name: Generate Terraform Plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -var-file="terraform.tfvars" -out=tfplan
 
       # Step 6: Save Terraform Plan (Optional)
       - name: Upload Terraform Plan
@@ -43,5 +43,7 @@ jobs:
           name: terraform-plan
           path: tfplan
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      # Step 7: Terraform Apply
+      - name: Apply Terraform Plan
+        if: github.event_name == 'workflow_dispatch' # Only runs manually
+        run: terraform apply -var-file="terraform.tfvars" -auto-approve
