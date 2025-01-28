@@ -18,5 +18,5 @@ If you wish to clone my repository feel free to do so:
 
 ### **Clone the Repository**
 ```bash
-git clone https://github.com/YourUsername/Azure-Terraform-Projects.git
+git clone https://github.com/AbduSalam1st/AzureTerraform.git
 cd Azure-Terraform-Projects
