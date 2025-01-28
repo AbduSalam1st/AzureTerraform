@@ -36,7 +36,6 @@ jobs:
           echo "client_secret   = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> terraform.tfvars
           echo "tenant_id       = \"${{ secrets.ARM_TENANT_ID }}\"" >> terraform.tfvars
           echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> terraform.tfvars
-          echo "computer_name   = \"hostname\"" >> terraform.tfvars
           echo "admin_username  = \"${{ secrets.ADMIN_USERNAME }}\"" >> terraform.tfvars
           echo "admin_password  = \"${{ secrets.ADMIN_PASSWORD }}\"" >> terraform.tfvars
           echo "resource_group_name = \"${{ secrets.RESOURCE_GROUP_NAME }}\"" >> terraform.tfvars
@@ -45,11 +44,6 @@ jobs:
       # Step 4: Terraform Init (Uses environment variables for Azure auth)
       - name: Terraform Init
         working-directory: Project 1
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         run: terraform init
 
       # Step 5: Terraform Validate
@@ -68,15 +62,3 @@ jobs:
         with:
           name: terraform-plan
           path: Project 1/tfplan
-
-      # Step 8: (Optional) Terraform Apply on Manual Dispatch
-      - name: Apply Terraform Plan
-        # 'workflow_dispatch' is triggered manually through the GitHub Actions UI
-        if: github.event_name == 'workflow_dispatch'
-        working-directory: Project 1
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        run: terraform apply -var-file="terraform.tfvars" -auto-approve
