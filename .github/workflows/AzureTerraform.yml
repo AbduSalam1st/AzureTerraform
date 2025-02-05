@@ -54,7 +54,7 @@ jobs:
       # Step 6: Terraform Plan
       - name: Generate Terraform Plan
         working-directory: Project 1
-        run: terraform plan -var-file=terraform.tfvars ## -out=tfplan
+        run: terraform plan -var-file=terraform.tfvars  ## -out=tfplan
 
       # Step 7: (Optional) Upload Terraform Plan
       - name: Upload Terraform Plan
