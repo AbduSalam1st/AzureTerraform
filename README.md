@@ -11,6 +11,7 @@ This repository showcases a collection of **Terraform** configurations designed 
 - **Automated Deployments**: Leverage CI/CD pipelines with GitHub Actions for seamless deployments.
 - **Security Best Practices**: Implement robust security measures, including RBAC and Azure Key Vault integration.
 - **Scalable Architectures**: Design infrastructure that scales efficiently with your needs.
+- **Kubernetes**: Applications hosted in Kubernetes clusters, with ansible playbook deployments.
 
 ## 🛠️ Getting Started
 
