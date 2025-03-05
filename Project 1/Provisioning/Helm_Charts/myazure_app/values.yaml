@@ -1,0 +1,20 @@
+replicaCount: 3
+
+api:
+  version: v1
+
+image:
+  repository: nginx:alpine
+
+volume:
+  mount:
+    path: /usr/share/nginx/html
+
+service:
+  type: NodePort
+  port: 80
+  protocol: TCP
+
+metadata:
+  labels:
+    app: static-website

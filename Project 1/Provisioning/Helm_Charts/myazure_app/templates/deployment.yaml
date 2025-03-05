@@ -8,7 +8,7 @@
         k8s:
           state: present
           definition:
-            apiVersion: v1
+            apiVersion: {{ .Values.api.version}}
             kind: ConfigMap
             metadata:
               name: website-content-config
@@ -32,27 +32,27 @@
             apiVersion: apps/v1
             kind: Deployment
             metadata:
-              name: static-website-deployment
+              name: {{ .Values.metadata.labels.app}}-deployment
               labels:
-                app: static-website
+                app: {{ .Values.metadata.labels.app}}
             spec:
-              replicas: 3
+              replicas: {{ .Values.replicaCount}}
               selector:
                 matchLabels:
-                  app: static-website
+                  app: {{ .Values.metadata.labels.app}}
               template:
                 metadata:
                   labels:
-                    app: static-website
+                    app: {{ .Values.metadata.labels.app}}
                 spec:
                   containers:
                   - name: nginx
-                    image: nginx:alpine
+                    image: {{ .Values.image.repository}}
                     ports:
-                    - containerPort: 80
+                    - containerPort: {{ .Values.service.port}}
                     volumeMounts:
                     - name: website-content
-                      mountPath: /usr/share/nginx/html
+                      mountPath: {{ .Values.volume.mount.path}}
                   volumes:
                   - name: website-content
                     configMap:
@@ -62,16 +62,16 @@
         k8s:
           state: present
           definition:
-            apiVersion: v1
+            apiVersion: {{ .Values.api.version}}
             kind: Service
             metadata:
-              name: static-website-service
+              name: {{ .Values.metadata.labels.app}}-service
             spec:
               selector:
-                app: static-website
+                app: {{ .Values.metadata.labels.app}}
               ports:
-              - protocol: TCP #Can change depending on loadbalancer type. Application level or Network Level
-                port: 80
-                targetPort: 80
-              type: NodePort  # Change to LoadBalancer or ClusterIP as needed
+              - protocol: {{ .Values.service.protocol}} #Can change depending on loadbalancer type. Application level or Network Level
+                port: {{ .Values.service.port}}
+                targetPort: {{ .Values.service.port}}
+              type: {{ .Values.service.type}}  # Change to LoadBalancer or ClusterIP as needed
   
