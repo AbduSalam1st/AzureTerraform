@@ -1,0 +1,2 @@
+Simple Static Web app deployment made with ansible integrated with HELM for quick agility.
+
