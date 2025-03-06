@@ -10,6 +10,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  checkov:
+    name: Checkov Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkov Scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: Project 1
+          framework: terraform  
+          download_external_modules: true 
+          soft_fail: false 
+         
+
   terraform:
     name: Terraform Deployment
     runs-on: ubuntu-latest
@@ -28,37 +42,23 @@ jobs:
         with:
           terraform_version: 1.5.6  # Use your preferred version
 
-      # Step 3: Dynamically Create terraform.tfvars from Environment Secrets
-      - name: Create terraform.tfvars
-        working-directory: Project 1
-        run: |
-          echo "client_id       = \"${{ secrets.ARM_CLIENT_ID }}\"" > terraform.tfvars
-          echo "client_secret   = \"${{ secrets.ARM_CLIENT_SECRET }}\"" >> terraform.tfvars
-          echo "tenant_id       = \"${{ secrets.ARM_TENANT_ID }}\"" >> terraform.tfvars
-          echo "subscription_id = \"${{ secrets.ARM_SUBSCRIPTION_ID }}\"" >> terraform.tfvars
-          echo "admin_username  = \"${{ secrets.ADMIN_USERNAME }}\"" >> terraform.tfvars
-          echo "admin_password  = \"${{ secrets.ADMIN_PASSWORD }}\"" >> terraform.tfvars
-          echo "resource_group_name = \"${{ secrets.RESOURCE_GROUP_NAME }}\"" >> terraform.tfvars
-          echo "resource_location   = \"${{ secrets.RESOURCE_LOCATION }}\"" >> terraform.tfvars
-
-      # Step 4: Terraform Init (Uses environment variables for Azure auth)
+      # Step 3: Terraform Init (Uses environment variables for Azure auth)
       - name: Terraform Init
         working-directory: Project 1
         run: terraform init
 
-      # Step 5: Terraform Validate
+      # Step 4: Terraform Validate
       - name: Validate Terraform configuration
         working-directory: Project 1
         run: terraform validate
 
-      # Step 6: Terraform Plan
+      # Step 5: Terraform Plan
       - name: Generate Terraform Plan
         working-directory: Project 1
-        run: terraform plan -var-file=terraform.tfvars  ## -out=tfplan
+        run: terraform plan -var="client_id=${{ secrets.ARM_CLIENT_ID }}" -var="client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var="tenant_id=${{ secrets.ARM_TENANT_ID }}" -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" # ... Add all vars here
+        env:  # Pass credentials via env (safer than tfvars)
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
-      # Step 7: (Optional) Upload Terraform Plan
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-plan
-          path: Project 1/tfplan
