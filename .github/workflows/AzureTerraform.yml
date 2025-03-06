@@ -55,10 +55,11 @@ jobs:
       # Step 5: Terraform Plan
       - name: Generate Terraform Plan
         working-directory: Project 1
-        run: terraform plan -var="client_id=${{ secrets.ARM_CLIENT_ID }}" -var="client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var="tenant_id=${{ secrets.ARM_TENANT_ID }}" -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" # ... Add all vars here
+        run: terraform plan -var="client_id=${{ secrets.ARM_CLIENT_ID }}" -var="client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var="tenant_id=${{ secrets.ARM_TENANT_ID }}" -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="admin_username=${{ secrets.ARM_ADMIN_USERNAME }}" -var="admin_password=${{ secrets.ARM_ADMIN_PASSWORD }}" # ... Add all vars here
         env:  # Pass credentials via env (safer than tfvars)
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-
+          ARM_ADMIN_USERNAME: ${{ secrets.ARM_ADMIN_USERNAME }}
+          ARM_ADMIN_PASSWORD: ${{ secrets.ARM_ADMIN_PASSWORD }}
