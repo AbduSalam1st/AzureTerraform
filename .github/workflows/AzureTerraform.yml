@@ -18,17 +18,25 @@ jobs:
       - name: Checkov Scan
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: Project 1
+          directory: "Project 1"
           framework: terraform  
           download_external_modules: true 
           soft_fail: false 
-         
+
+  trivy-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          severity: 'CRITICAL,HIGH,MEDIUM'
 
   terraform:
     name: Terraform Deployment
     runs-on: ubuntu-latest
     
-    # 1) Reference your environment here. Replace 'AzureP1' with your actual environment name if different.
+    # 1) Reference your environment here
     environment: AzureP1
 
     steps:
