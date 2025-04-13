@@ -1,17 +1,15 @@
+# We strongly recommend using the required_providers block to set the
+# Azure Provider source and version being used
 terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.14.0"
+      version = "=4.25.0"
     }
   }
 }
 
-
 provider "azurerm" {
-  client_id       = var.client_id
-  client_secret   = var.client_secret
-  tenant_id       = var.tenant_id
   subscription_id = var.subscription_id
   features {}
 }
@@ -79,25 +77,12 @@ module "appgw" {
   appgw_name           = "appgw-waf"
 }
 
-# ---------------------
-# MODULE: Sentinel & Log Analytics
-# ---------------------
-module "sentinel" {
-  source = "./modules/security"
+# # ---------------------
+# # MODULE: Sentinel & Log Analytics
+# # ---------------------
+# module "sentinel" {
+#   source = "./modules/security"
 
-  resource_group_name = var.resource_group_name
-  resource_location   = var.resource_location
-}
-
-# ---------------------
-# MODULE: Logic App
-# ---------------------
-module "logic_app" {
-  source = "./modules/logicapp"
-
-  resource_group_name = var.resource_group_name
-  resource_location   = var.resource_location
-  vm_name             = module.vm.vm_name # if needed for role assignment
-  subscription_id     = var.subscription_id
-}
-
+#   resource_group_name = var.resource_group_name
+#   resource_location   = var.resource_location
+# }

@@ -1,0 +1,11 @@
+name: EDR-Azure
+description: EDR in Azure for isolating endpoints
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: azure-python
