@@ -1,4 +1,4 @@
-resource "azurerm_kubernetes_cluster" "this" {
+resource "azurerm_kubernetes_cluster" "k8_abdul" {
   name                = "learnk8scluster"
   location            = var.resource_location
   resource_group_name = var.resource_group_name
@@ -9,7 +9,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     vm_size              = "Standard_B2s"
     node_count           = 1
     min_count            = 1
-    max_count            = 3
+    max_count            = 2
     auto_scaling_enabled = true
   }
 

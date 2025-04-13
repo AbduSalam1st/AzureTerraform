@@ -1,7 +1,7 @@
 variable "subscription_id" {
   type        = string
   description = "Subscription ID"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "tenant_id" {
@@ -23,13 +23,13 @@ variable "client_secret" {
 variable "resource_group_name" {
   type        = string
   description = "VPC1"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "resource_location" {
   type        = string
   description = "UK South"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "admin_username" {
