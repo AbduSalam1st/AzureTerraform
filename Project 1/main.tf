@@ -1,5 +1,3 @@
-# We strongly recommend using the required_providers block to set the
-# Azure Provider source and version being used
 terraform {
   required_providers {
     azurerm = {
@@ -14,31 +12,27 @@ provider "azurerm" {
   features {}
 }
 
-# ---------------------
+
 # MODULE: Networking
-# ---------------------
 module "networking" {
   source = "./modules/networking"
 
   resource_group_name = var.resource_group_name
   resource_location   = var.resource_location
 
-  # Example of passing custom naming if needed
   vnet_name           = "VPC1"
   subnet1_name        = "Subnet1"
   subnet_sandbox_name = "sandboxEnviroment"
 }
 
-# ---------------------
+
 # MODULE: Virtual Machine
-# ---------------------
 module "vm" {
   source = "./modules/compute"
 
   resource_group_name = var.resource_group_name
   resource_location   = var.resource_location
 
-  # Pass the Subnet ID from Networking module output
   subnet_id = module.networking.subnet1_id
 
   admin_username = var.admin_username
@@ -46,9 +40,8 @@ module "vm" {
   vm_name        = "Workstation1"
 }
 
-# ---------------------
+
 # MODULE: AKS Cluster
-# ---------------------
 module "aks" {
   source = "./modules/aks"
 
@@ -64,18 +57,18 @@ module "aks" {
 # ---------------------
 # MODULE: Application Gateway
 # ---------------------
-module "appgw" {
-  source = "./modules/AGIC"
+# module "appgw" {
+#   source = "./modules/AGIC"
 
-  resource_group_name = var.resource_group_name
-  resource_location   = var.resource_location
+#   resource_group_name = var.resource_group_name
+#   resource_location   = var.resource_location
 
-  # Provide any custom naming
-  appgw_vnet_name      = "AGW_Network"
-  appgw_subnet_name    = "AGW_Subnet"
-  appgw_public_ip_name = "appgw-public-ip"
-  appgw_name           = "appgw-waf"
-}
+#   # Provide any custom naming
+#   appgw_vnet_name      = "AGW_Network"
+#   appgw_subnet_name    = "AGW_Subnet"
+#   appgw_public_ip_name = "appgw-public-ip"
+#   appgw_name           = "appgw-waf"
+# }
 
 # # ---------------------
 # # MODULE: Sentinel & Log Analytics
