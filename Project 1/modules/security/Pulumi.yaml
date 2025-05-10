@@ -1,5 +1,5 @@
-name: EDR-Azure
-description: EDR in Azure for isolating endpoints
+name: EDR
+description: making EDR
 runtime:
   name: python
   options:
