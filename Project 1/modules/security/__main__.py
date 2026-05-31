@@ -27,7 +27,7 @@ pulumi.export("workspace_id", workspace.id)
 # 3c. Enable Azure Sentinel (onboard the workspace)
 sentinel = azure_native.securityinsights.SentinelOnboardingState("onboarding",
     resource_group_name=rg.name,
-    workspace_name= workspace.id,
+    workspace_name=workspace.name,
     sentinel_onboarding_state_name="default",
     customer_managed_key=False,
 )
@@ -48,8 +48,8 @@ union isfuzzy=true
 
 # Create the scheduled analytics rule
 malware_rule = azure_native.securityinsights.ScheduledAlertRule("malware-detection-rule",
-    resource_group_name="rg-sentinel-demo",
-    workspace_name="la-sentinel-demo",
+    resource_group_name=rg.name,
+    workspace_name=workspace.name,
     rule_id="malware-detection-rule",  # must be unique
     display_name="Malware Detection on VM",
     description="Detects malware alerts from Microsoft Defender for Endpoint (MDATP) involving VMs.",
@@ -74,7 +74,8 @@ malware_rule = azure_native.securityinsights.ScheduledAlertRule("malware-detecti
                 )
             ]
         )
-    ]
+    ],
+    opts=pulumi.ResourceOptions(depends_on=[sentinel]),
 )
 
 

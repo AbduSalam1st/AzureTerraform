@@ -1,7 +1,7 @@
 resource "azurerm_kubernetes_cluster" "k8_abdul" {
   name                = "learnk8scluster"
-  location            = "UK South"
-  resource_group_name = "VPC1"
+  location            = var.resource_location
+  resource_group_name = var.resource_group_name
   dns_prefix          = "learnk8scluster"
 
   default_node_pool {
